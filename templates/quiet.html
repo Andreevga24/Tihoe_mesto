@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main id="main-content" class="experience quiet-experience" aria-label="{{ page.title }}" data-phrases='{{ page.phrases|tojson }}' data-next-label="{{ page.next_room }}">
+    <div class="quiet-copy" aria-live="polite" aria-atomic="true">
+        <p id="quiet-prompt" class="quiet-prompt">{{ page.start }}</p>
+    </div>
+    <p class="quiet-progress" id="quiet-progress" aria-hidden="true"></p>
+    <a id="thoughts-link" class="quiet-next-link" href="{{ url_for('localized_page', language=language_code, theme=theme, room='thoughts') }}" hidden>{{ page.next_room }} <span aria-hidden="true">→</span></a>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/quiet.js') }}" defer></script>
+{% endblock %}
+
+{% block audio %}
+<audio class="background-audio" id="background-audio" src="{{ url_for('static', filename='audio/quiet-piano.mp3') }}" loop preload="none" aria-hidden="true"></audio>
+{% endblock %}

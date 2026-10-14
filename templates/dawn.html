@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main id="main-content" class="experience dawn-experience" aria-label="{{ page.title }}" data-phrases='{{ page.phrases|tojson }}'>
+    <h1 class="dawn-heading">{{ page.title }} — {{ page.headline }}</h1>
+    <p class="dawn-phrase" id="dawn-phrase" aria-live="polite" aria-atomic="true"></p>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dawn.js') }}" defer></script>
+{% endblock %}

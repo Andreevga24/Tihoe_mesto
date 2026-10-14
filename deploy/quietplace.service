@@ -1,0 +1,35 @@
+[Unit]
+Description=The Quiet Place Project (Flask via Gunicorn)
+Documentation=https://thequietplaceproject.com
+After=network.target
+
+[Service]
+# Пользователь и каталог: при необходимости замените www-data и путь.
+User=www-data
+Group=www-data
+WorkingDirectory=/srv/quietplace
+Environment=PYTHONUNBUFFERED=1
+Environment=PATH=/srv/quietplace/.venv/bin
+# Логи запросов отключены; Gunicorn установлен отдельно от requirements.txt.
+ExecStart=/srv/quietplace/.venv/bin/gunicorn \
+    --workers 2 \
+    --bind 127.0.0.1:8000 \
+    --access-logfile /dev/null \
+    --error-logfile /dev/null \
+    --log-level critical \
+    --timeout 30 \
+    --graceful-timeout 30 \
+    wsgi:application
+StandardOutput=null
+StandardError=null
+Restart=on-failure
+RestartSec=3
+
+# Ограничения безопасности: службе нужен только собственный каталог.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

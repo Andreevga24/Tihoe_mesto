@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main id="main-content" class="experience comfort-experience" aria-label="{{ page.title }}" data-phrases='{{ page.phrases|tojson }}'>
+    <h1 class="comfort-heading">{{ page.invitation }}</h1>
+    <textarea class="comfort-editor" id="comfort-editor" aria-label="{{ page.aria_editor }}" placeholder="{{ page.placeholder }}" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    <button class="release-button" id="release-button" type="button" aria-label="{{ page.aria_release }}" hidden>{{ page.release }}</button>
+    <p class="comfort-support" id="comfort-support" aria-live="polite" aria-atomic="true"></p>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/comfort.js') }}" defer></script>
+{% endblock %}

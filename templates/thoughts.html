@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main id="main-content" class="experience thoughts-experience" aria-label="{{ page.title }}" data-done-text="{{ page.done }}" data-hint-text="{{ page.hint }}">
+    <h1 class="thoughts-heading">{{ page.invitation }}</h1>
+    <p class="thoughts-privacy">{{ page.privacy }}</p>
+    <textarea class="thoughts-editor" id="thoughts-editor" aria-label="{{ page.aria_editor }}" placeholder="{{ page.placeholder }}" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    <p class="thoughts-hint" id="thoughts-hint">{{ page.hint }}</p>
+    <p class="thoughts-release" id="thoughts-release" aria-live="polite" aria-atomic="true"></p>
+    <canvas class="thoughts-canvas" id="thoughts-canvas" aria-hidden="true"></canvas>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/thoughts.js') }}" defer></script>
+{% endblock %}
+
+{% block audio %}
+<audio class="background-audio" id="background-audio" src="{{ url_for('static', filename='audio/quiet-piano.mp3') }}" loop preload="none" aria-hidden="true"></audio>
+{% endblock %}

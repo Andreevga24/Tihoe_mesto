@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="{{ language.html_lang }}" class="theme-{{ theme }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="{{ '#f5f7fa' if theme == 'light' else '#080b14' }}">
+    <meta name="description" content="{{ page.headline }}">
+    <title>{{ page.title }} — {{ language.site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="data:,">
+    {% block head %}{% endblock %}
+</head>
+<body class="page-{{ page.tab }} theme-{{ theme }}" data-page="{{ page.tab }}">
+    <a class="skip-link" href="#main-content">{{ language.ui.skip }}</a>
+    <nav class="language-switch" aria-label="{{ language.ui.language }}" data-label-language="{{ language.ui.language }}">
+        {% for option in language_options %}
+        <a href="{{ option.href }}" lang="{{ option.code }}" hreflang="{{ option.code }}" aria-label="{{ language.ui.language }}: {{ option.name }}"{% if option.current %} aria-current="page"{% endif %}>{{ option.code|upper }}</a>
+        {% endfor %}
+    </nav>
+    <nav class="theme-switch" aria-label="{{ language.ui.theme }}">
+        {% for option in theme_options %}
+        <a href="{{ option.href }}" aria-label="{{ language.ui.theme }}: {{ option.name }}" title="{{ language.ui.theme }}: {{ option.name }}"{% if option.current %} aria-current="page"{% endif %}>
+            <span aria-hidden="true">{% if option.code == 'dark' %}☾{% else %}☼{% endif %}</span>
+            <span>{{ option.name }}</span>
+        </a>
+        {% endfor %}
+    </nav>
+    <nav class="room-nav" aria-label="{{ language.rooms }}">
+        <span class="room-nav-title" aria-hidden="true">{{ language.rooms }}</span>
+        {% for slug in nav %}
+        <a href="{{ url_for('localized_page', language=language_code, theme=theme, room=slug) }}"{% if current == slug %} aria-current="page"{% endif %}>{{ language.nav[slug] }}</a>
+        {% endfor %}
+    </nav>
+    {% block audio %}{% endblock %}
+    {% if current in ['quiet', 'thoughts'] %}
+    <button class="mute-toggle" type="button" aria-label="{{ language.ui.mute }}" aria-pressed="false" title="{{ language.ui.mute }}" data-label-mute="{{ language.ui.mute }}" data-label-unmute="{{ language.ui.unmute }}" hidden>
+        <span class="mute-icon" aria-hidden="true">♪</span>
+    </button>
+    {% endif %}
+    <div class="page-shell">
+        {% block content %}{% endblock %}
+        <footer class="page-footer">
+            <p class="privacy-note">{{ language.ui.privacy }}</p>
+        </footer>
+        <button class="to-top" type="button" aria-label="{{ language.ui.to_top }}" title="{{ language.ui.to_top }}" hidden>
+            <span aria-hidden="true">↑</span>
+        </button>
+    </div>
+    <script src="{{ url_for('static', filename='js/base.js') }}" defer></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
