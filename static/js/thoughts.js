@@ -7,6 +7,7 @@
     const canvas = document.getElementById("thoughts-canvas");
     const context = canvas.getContext("2d");
     const release = document.getElementById("thoughts-release");
+    const releaseButton = document.getElementById("thoughts-release-button");
     const hint = document.getElementById("thoughts-hint");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const lightTheme = document.body.classList.contains("theme-light");
@@ -19,7 +20,10 @@
     // Показать поле после небольшой паузы, чтобы сохранить тишину вступления.
     window.setTimeout(() => {
         editor.classList.add("is-ready");
-        editor.focus({ preventScroll: true });
+        // Не открывать экранную клавиатуру автоматически на телефоне.
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            editor.focus({ preventScroll: true });
+        }
     }, 1800);
 
     function fitCanvas() {
@@ -121,10 +125,14 @@
             experience.classList.remove("is-dissolving");
             editor.value = "";
             editor.disabled = false;
+            releaseButton.disabled = false;
+            releaseButton.hidden = true;
             hint.textContent = experience.dataset.hintText;
             busy = false;
             finishing = false;
-            editor.focus({ preventScroll: true });
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                editor.focus({ preventScroll: true });
+            }
         }, 4000);
     }
 
@@ -133,6 +141,8 @@
         if (busy || !text.trim()) return;
         busy = true;
         editor.disabled = true;
+        releaseButton.disabled = true;
+        releaseButton.hidden = true;
         hint.textContent = "";
         experience.classList.add("is-dissolving");
 
@@ -146,12 +156,18 @@
         frame = window.requestAnimationFrame((timestamp) => drawParticles(timestamp, startedAt));
     }
 
+    editor.addEventListener("input", () => {
+        releaseButton.hidden = !editor.value.trim() || busy;
+    });
+
     editor.addEventListener("keydown", (event) => {
         if (event.key === "Enter" && event.shiftKey) {
             event.preventDefault();
             dissolve();
         }
     });
+
+    releaseButton.addEventListener("click", dissolve);
 
     reducedMotion.addEventListener("change", () => {
         if (busy && reducedMotion.matches) {

@@ -38,4 +38,10 @@
         event.preventDefault();
         advance();
     });
+
+    // На телефонах нет клавиши Space: тап по сцене выполняет то же действие.
+    experience.addEventListener("click", (event) => {
+        if (event.target instanceof Element && event.target.closest("a, button, input, textarea, select")) return;
+        advance();
+    });
 })();

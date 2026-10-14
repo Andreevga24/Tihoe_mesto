@@ -20,7 +20,7 @@
 Все четыре комнаты доступны во всех шести сочетаниях языка и темы (24 адреса). Тема по умолчанию — тёмная; переключатель ☾ / ☼ находится справа сверху. Корень `/` выбирает доступный язык из `Accept-Language`; если браузер не запрашивает английский, французский или русский, открывается английская версия в тёмной теме. Названия комнат проекта остаются переведёнными в меню каждой локали.
 
 - **The Quiet Place** — короткие спокойные фразы по пробелу, музыка запускается после первого действия пользователя.
-- **The Thoughts Room** — поле для свободной записи и локальная анимация растворения отдельных букв на Canvas. `Enter` добавляет строку, `Shift+Enter` запускает растворение.
+- **The Thoughts Room** — поле для свободной записи и локальная анимация растворения отдельных букв на Canvas. `Enter` добавляет строку, `Shift+Enter` запускает растворение на клавиатуре; на сенсорных устройствах для этого появляется кнопка «Отпустить». Запись остаётся в браузере и никуда не отправляется.
 - **The Comfort Spot** (`/en/dark/comfort`) — приватная заметка и кнопка `release`, после которой появляется поддерживающая фраза.
 - **The Dawn Room** — медленно меняющаяся тёмно-синяя палитра и чередующиеся ободряющие фразы.
 
@@ -54,8 +54,18 @@ python app.py
 
 ### 1. DNS и сеть
 
-1. У регистратора добавьте DNS-записи `A` для `@` и `www`, указывающие на `194.226.122.180`. Запись `AAAA` добавляйте только если на VPS правильно настроен IPv6.
-2. Откройте входящие порты 80 и 443. Оставьте SSH-порт открытым, чтобы не потерять доступ. Для UFW:
+1. У регистратора домен должен быть делегирован на DNS-серверы, в зоне которых вы правите записи. Здесь используются бесплатные DNS-серверы reg.ru: `ns1.reg.ru` и `ns2.reg.ru`. Смена NS выполняется в разделе «DNS-серверы и управление зоной» карточки домена; до её применения весь интернет читает старую зону, даже если записи в новой уже верны. Проверка:
+
+```bash
+nslookup -type=NS gagroup24.ru 8.8.8.8
+nslookup -type=A  gagroup24.ru ns1.reg.ru
+nslookup -type=A  www.gagroup24.ru ns2.reg.ru
+```
+
+Ожидаемый ответ — `ns1.reg.ru` / `ns2.reg.ru` и `194.226.122.180` для обоих имён.
+
+2. В зоне добавьте DNS-записи `A` для `@` и `www`, указывающие на `194.226.122.180`. Запись `AAAA` добавляйте только если на VPS правильно настроен IPv6: при наличии `AAAA` Let's Encrypt может пойти по IPv6 и получить отказ, даже когда IPv4 настроен верно. Старые `A`/`AAAA` хостинга нужно удалить, а не оставлять рядом с новыми.
+3. Откройте входящие порты 80 и 443. Оставьте SSH-порт открытым, чтобы не потерять доступ. Для UFW:
 
 ```bash
 sudo ufw allow OpenSSH
@@ -107,31 +117,65 @@ curl --fail http://127.0.0.1:8000/en/dark/quiet
 
 ### 4. Nginx и HTTPS
 
-Сначала создайте каталог для ACME challenge и установите временный HTTP-only конфиг:
+Сертификат выпускается до включения HTTPS-блока: пока файла `/etc/letsencrypt/live/gagroup24.ru/fullchain.pem` нет, Nginx с `ssl_certificate` не запустится вообще, и `nginx -t` будет падать с `BIO_new_file() failed`. Поэтому на время выпуска HTTPS-блок в конфиге отключён.
+
+Установите Certbot. Для выбранного здесь способа `--webroot` достаточно самого Certbot; `python3-certbot-nginx` нужен только для команды с authenticator `--nginx` и здесь не используется.
+
+```bash
+sudo apt install -y certbot
+```
+
+Создайте каталог для ACME challenge и установите временный HTTP-only конфиг:
 
 ```bash
 sudo mkdir -p /var/www/certbot
 sudo cp deploy/nginx-bootstrap.conf /etc/nginx/sites-available/quietplace
+sudo ln -s /etc/nginx/sites-available/quietplace /etc/nginx/sites-enabled/quietplace
+sudo nginx -t && sudo systemctl reload nginx
+curl -4 -sI http://gagroup24.ru/.well-known/acme-challenge/test | head -1   # ожидается 404, но не отказ соединения
 ```
 
-В `/etc/nginx/sites-available/quietplace` уже указан домен `gagroup24.ru`; проверьте, что он остался на месте, включите сайт и выпустите сертификат:
+Выпустите сертификат:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/quietplace /etc/nginx/sites-enabled/quietplace
-sudo nginx -t
-sudo systemctl reload nginx
 sudo certbot certonly --webroot -w /var/www/certbot -d gagroup24.ru -d www.gagroup24.ru
 ```
 
-Если `www.gagroup24.ru` не будете использовать, уберите его из `server_name` в обоих конфигах и из команды certbot. После выдачи сертификата замените временный файл полным HTTPS-конфигом:
+Если `www.gagroup24.ru` не будете использовать, уберите его из `server_name` в конфигах и из команды certbot. Проверьте, что файлы появились:
+
+```bash
+sudo ls -l /etc/letsencrypt/live/gagroup24.ru/
+```
+
+Теперь включите полный HTTPS-конфиг и проверьте работу:
 
 ```bash
 sudo cp deploy/nginx-quietplace.conf /etc/nginx/sites-available/quietplace
 sudo nginx -t && sudo systemctl reload nginx
+curl -4 -sI http://gagroup24.ru/ | head -1    # ожидается 301 на HTTPS
+curl -4 -sI https://gagroup24.ru/ | head -1   # ожидается 200 или 302 от приложения
 sudo certbot renew --dry-run
 ```
 
-Полный конфиг перенаправляет HTTP на HTTPS и проксирует сайт на `127.0.0.1:8000`. Пути сертификата — `/etc/letsencrypt/live/gagroup24.ru/...`; при смене домена поправьте их и `server_name`.
+Полный конфиг перенаправляет HTTP на HTTPS и проксирует сайт на `127.0.0.1:8000`; путь `/.well-known/acme-challenge/` оставлен в HTTP-блоке, чтобы обновление сертификата шло без остановки сайта. Пути сертификата — `/etc/letsencrypt/live/gagroup24.ru/...`; при смене домена поправьте их и `server_name`.
+
+Если нужно выпустить сертификат, когда Nginx нельзя запустить вообще, используйте standalone: `sudo systemctl stop nginx && sudo certbot certonly --standalone -d gagroup24.ru -d www.gagroup24.ru && sudo systemctl start nginx`. Автопродление при этом продолжит работать через webroot, потому что оно записано в `/etc/letsencrypt/renewal/gagroup24.ru.conf` при первом выпуске.
+
+### 4a. Если пришлось отключать HTTPS-блок вручную
+
+Когда конфиг уже развёрнут, а сертификата нет (например, после смены домена или NS), поступают так:
+
+```bash
+sudo cp /etc/nginx/sites-available/quietplace /root/quietplace.bak
+sudo sed -i '28,75 s/^/#/' /etc/nginx/sites-available/quietplace   # номера строк — по вашему файлу
+sudo nano /etc/nginx/sites-available/quietplace                    # в блоке :80 заменить return 301 на proxy_pass http://127.0.0.1:8000
+sudo nginx -t && sudo systemctl restart nginx
+sudo certbot certonly --webroot -w /var/www/certbot -d gagroup24.ru -d www.gagroup24.ru
+sudo cp /root/quietplace.bak /etc/nginx/sites-available/quietplace
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Важно: одного закомментированного HTTPS-блока мало — HTTP-блок по умолчанию делает `return 301` на HTTPS, и проверка Let's Encrypt получит отказ соединения. На время выпуска `location /` должен отдавать приложение по HTTP.
 
 ### 5. Отключение журналов запросов
 

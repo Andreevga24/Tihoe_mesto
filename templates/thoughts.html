@@ -5,6 +5,7 @@
     <h1 class="thoughts-heading">{{ page.invitation }}</h1>
     <p class="thoughts-privacy">{{ page.privacy }}</p>
     <textarea class="thoughts-editor" id="thoughts-editor" aria-label="{{ page.aria_editor }}" placeholder="{{ page.placeholder }}" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    <button class="release-button thoughts-release-button" id="thoughts-release-button" type="button" aria-label="{{ page.aria_release }}" hidden>{{ page.release }}</button>
     <p class="thoughts-hint" id="thoughts-hint">{{ page.hint }}</p>
     <p class="thoughts-release" id="thoughts-release" aria-live="polite" aria-atomic="true"></p>
     <canvas class="thoughts-canvas" id="thoughts-canvas" aria-hidden="true"></canvas>

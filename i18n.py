@@ -30,7 +30,7 @@ TRANSLATIONS = {
         "quiet": {
             "title": "The Quiet Place",
             "headline": "Find some quiet.",
-            "start": "press space to begin",
+            "start": "press space or tap to begin",
             "next_room": "The Thoughts Room",
             "phrases": [
                 "take a slow breath in...", "and gently let it go.",
@@ -49,6 +49,8 @@ TRANSLATIONS = {
             "privacy": "nothing is saved. nothing is sent anywhere.",
             "placeholder": "what's on your mind?",
             "hint": "shift + enter to let it go",
+            "release": "release",
+            "aria_release": "Release and clear your writing",
             "done": "let it go.",
             "aria_editor": "Write what is on your mind; your text stays in this browser",
         },
@@ -102,7 +104,7 @@ TRANSLATIONS = {
         "quiet": {
             "title": "Le lieu du calme",
             "headline": "Un peu de calme.",
-            "start": "appuyez sur espace pour commencer",
+            "start": "appuyez sur espace ou touchez l’écran pour commencer",
             "next_room": "La salle des pensées",
             "phrases": [
                 "inspirez lentement...", "et expirez doucement.",
@@ -121,6 +123,8 @@ TRANSLATIONS = {
             "privacy": "rien n'est enregistré. rien n'est envoyé nulle part.",
             "placeholder": "qu'avez-vous sur le cœur ?",
             "hint": "maj + entrée pour laisser partir",
+            "release": "relâcher",
+            "aria_release": "Relâcher et effacer votre texte",
             "done": "laissez partir.",
             "aria_editor": "Écrivez ce que vous avez sur le cœur ; votre texte reste dans ce navigateur",
         },
@@ -174,7 +178,7 @@ TRANSLATIONS = {
         "quiet": {
             "title": "Место тишины",
             "headline": "Найдите немного тишины.",
-            "start": "нажмите пробел, чтобы начать",
+            "start": "нажмите пробел или коснитесь экрана, чтобы начать",
             "next_room": "Комната мыслей",
             "phrases": [
                 "медленно вдохните...", "и мягко выдохните.",
@@ -193,6 +197,8 @@ TRANSLATIONS = {
             "privacy": "ничего не сохраняется. ничего никуда не отправляется.",
             "placeholder": "что у вас на душе?",
             "hint": "shift + enter, чтобы отпустить",
+            "release": "отпустить",
+            "aria_release": "Отпустить и очистить написанное",
             "done": "отпустите.",
             "aria_editor": "Напишите то, что у вас на душе; текст остаётся в этом браузере",
         },
